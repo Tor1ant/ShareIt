@@ -3,6 +3,9 @@ package ru.practicum.shareit.user;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -33,8 +36,13 @@ public class UserController {
     }
 
     @PostMapping
-    public User saveNewUser(@RequestBody @Valid User user) {
-        return userService.saveUser(user);
+    public ResponseEntity<?> saveNewUser(@RequestBody @Valid User user) {
+        try {
+            User userToSend = userService.saveUser(user);
+            return ResponseEntity.ok(userToSend);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email уже занят.");
+        }
     }
 
     @PatchMapping("/{userId}")

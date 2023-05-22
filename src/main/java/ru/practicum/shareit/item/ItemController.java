@@ -3,7 +3,6 @@ package ru.practicum.shareit.item;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -14,26 +13,28 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.item.services.ItemService;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.InputCommentDto;
 import ru.practicum.shareit.item.dto.ItemDTO;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
+import ru.practicum.shareit.item.services.ItemService;
 
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
-@Slf4j
 public class ItemController {
+
     private final ItemService itemService;
-    private static final String CUSTOM_USER_ID_HEADER = "X-Sharer-User-Id";
+    public static final String CUSTOM_USER_ID_HEADER = "X-Sharer-User-Id";
 
     @GetMapping
-    public List<ItemDTO> getUserItems(@RequestHeader(CUSTOM_USER_ID_HEADER) long userId) {
+    public List<ItemDtoWithBooking> getUserItems(@RequestHeader(CUSTOM_USER_ID_HEADER) long userId) {
         return itemService.getUserItems(userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDTO getItem(@RequestHeader(CUSTOM_USER_ID_HEADER) long userId, @PathVariable long itemId) {
-        log.info("Пользователь с id " + userId + " получил item с id " + itemId);
-        return itemService.getItem(itemId);
+    public ItemDtoWithBooking getItem(@RequestHeader(CUSTOM_USER_ID_HEADER) long userId, @PathVariable long itemId) {
+        return itemService.getItem(userId, itemId);
     }
 
     @PostMapping
@@ -43,7 +44,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDTO update(@RequestHeader(CUSTOM_USER_ID_HEADER) long userId, @RequestBody ItemDTO itemDTO,
-                          @PathVariable long itemId) {
+            @PathVariable long itemId) {
         if (itemDTO.getId() == null) {
             itemDTO.setId(itemId);
         }
@@ -57,6 +58,12 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDTO> searchItem(@RequestHeader(CUSTOM_USER_ID_HEADER) long userId, @RequestParam String text) {
-       return itemService.searchItem(text);
+        return itemService.searchItem(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader(CUSTOM_USER_ID_HEADER) long userId,
+            @RequestBody @Valid InputCommentDto text, @PathVariable long itemId) {
+        return itemService.createComment(userId, itemId, text);
     }
 }
