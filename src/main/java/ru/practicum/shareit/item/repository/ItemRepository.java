@@ -1,20 +1,28 @@
 package ru.practicum.shareit.item.repository;
 
 import java.util.List;
-import ru.practicum.shareit.item.dto.ItemDTO;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.item.model.Item;
 
-public interface ItemRepository {
+public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    List<ItemDTO> getUserItems(long userId);
+    List<Item> findItemsByOwnerIdOrderByIdAsc(Long userId);
 
-    ItemDTO getItem(long itemId);
+    @Query("select i "
+            + "from Item as i "
+            + "join fetch i.owner as o where i.id = :itemId and o.id = :ownerId")
+    Item findItemByIdAndOwnerId(@Param("itemId") Long itemId, @Param("ownerId") Long ownerId);
 
-    ItemDTO save(Item item);
+    @Query("select i "
+            + "from Item as i "
+            + "where lower(i.name) like lower(concat('%' , :search, '%')) "
+            + "or lower(i.description) like  lower(concat('%', :search,'%')) and i.available != false ")
+    Optional<List<Item>> search(@Param("search") String searchString);
 
-    ItemDTO update(Item item);
+    Optional<Item> getItemByIdAndOwnerId(Long itemId, Long userId);
 
-    void deleteByUserIdAndItemId(long userId, long itemId);
-
-    List<ItemDTO> searchItem(String text);
+    void deleteByIdAndOwnerId(Long itemId, Long userId);
 }
