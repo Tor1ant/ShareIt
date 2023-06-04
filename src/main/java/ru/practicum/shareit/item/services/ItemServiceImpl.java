@@ -1,14 +1,5 @@
 package ru.practicum.shareit.item.services;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
@@ -29,8 +20,14 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +38,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final RequestRepository requestRepository;
     private final ItemsMapperMapstruct itemsMapper = Mappers.getMapper(ItemsMapperMapstruct.class);
     private final BookingMapperMapstruct bookingMapper = Mappers.getMapper(BookingMapperMapstruct.class);
     private final CommentMapperMapstruct commentMapper = Mappers.getMapper(CommentMapperMapstruct.class);
@@ -84,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void setLastAndNextBookings(List<ItemDtoWithBooking> itemDtoWithBookings,
-            Map<Long, List<Booking>> bookingsMap) {
+                                        Map<Long, List<Booking>> bookingsMap) {
         LocalDateTime currentTime = LocalDateTime.now();
 
         itemDtoWithBookings.forEach(itemDtoWithBooking -> {
@@ -135,7 +133,12 @@ public class ItemServiceImpl implements ItemService {
         if (!user.isPresent()) {
             throw new NotFoundException("Пользователь для добавления вещи не найден");
         }
+
         Item item = itemsMapper.itemDtoToItem(itemDTO, userId);
+        if (itemDTO.getRequestId() != null) {
+            requestRepository.findById(itemDTO.getRequestId()).ifPresent(item::setRequest);
+        }
+
         item.setOwner(user.get());
         item = itemRepository.save(item);
         itemDTO.setId(item.getId());

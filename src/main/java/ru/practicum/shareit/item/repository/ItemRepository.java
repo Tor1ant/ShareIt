@@ -1,12 +1,16 @@
 package ru.practicum.shareit.item.repository;
 
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.List;
+import java.util.Optional;
+
+@Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findItemsByOwnerIdOrderByIdAsc(Long userId);
@@ -25,4 +29,10 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     Optional<Item> getItemByIdAndOwnerId(Long itemId, Long userId);
 
     void deleteByIdAndOwnerId(Long itemId, Long userId);
+
+    @Query("select new ru.practicum.shareit.item.dto.ItemForRequestDto(i.id, i.name, i.description, i.available" +
+            ", i.request.id) " +
+            "from Item as i " +
+            "where i.request.id IN :requestsId")
+    List<ItemForRequestDto> findAllByRequests(@Param("requestsId") List<Long> requestsId);
 }
