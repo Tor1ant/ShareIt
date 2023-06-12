@@ -1,10 +1,11 @@
 package ru.practicum.shareit.booking.service;
 
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapperMapstruct;
@@ -18,6 +19,9 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -90,38 +94,41 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Booking> getAllBookings(Long userID, String state) {
+    public List<Booking> getAllBookings(Long userID, String state, Long from, Long size) {
         Optional<List<Booking>> bookingList;
         Optional<User> user = userRepository.findById(userID);
 
         if (!user.isPresent()) {
             throw new NotFoundException("Пользователь не найден");
         }
+        PageRequest sortedByEndDesc = PageRequest.of(from.intValue() > 0 ? from.intValue() / size.intValue() : 0,
+                size.intValue(), Sort.by("end").descending());
+
         switch (state) {
             case "ALL":
-                bookingList = bookingRepository.findBookingsByBookerIdOrderByEndDesc(userID);
+                bookingList = bookingRepository.findBookingsByBookerId(userID, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             case "CURRENT":
-                bookingList = bookingRepository.findAllCurrentByUserIdAndSortByDesc(userID);
+                bookingList = bookingRepository.findAllCurrentByUserIdAndSortByDesc(userID, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             case "PAST":
-                bookingList = bookingRepository.findAllPastByUserIdAndSortByDesc(userID);
+                bookingList = bookingRepository.findAllPastByUserIdAndSortByDesc(userID, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             case "FUTURE":
-                bookingList = bookingRepository.findAllFutureByUserIdAndSortByDesc(userID);
+                bookingList = bookingRepository.findAllFutureByUserIdAndSortByDesc(userID, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             case "WAITING":
                 bookingList = bookingRepository.findBookingsByStatusAndBookerIdOrderByEndDesc(BookingStatus.WAITING,
-                        userID);
+                        userID, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             case "REJECTED":
                 bookingList = bookingRepository.findBookingsByStatusAndBookerIdOrderByEndDesc(BookingStatus.REJECTED,
-                        userID);
+                        userID, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             default:
@@ -135,38 +142,38 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Booking> getAllOwnerBookings(Long ownerId, String state) {
+    public List<Booking> getAllOwnerBookings(Long ownerId, String state, Long from, Long size) {
         Optional<List<Booking>> bookingList;
         Optional<User> user = userRepository.findById(ownerId);
-
+        Pageable sortedByEndDesc = PageRequest.of(from.intValue(), size.intValue(), Sort.by("end").descending());
         if (!user.isPresent()) {
             throw new NotFoundException("Пользователь не найден");
         }
         switch (state) {
             case "ALL":
-                bookingList = bookingRepository.findBookingsByItemOwnerIdOrderByEndDesc(ownerId);
+                bookingList = bookingRepository.findBookingsByItemOwnerIdOrderByEndDesc(ownerId, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             case "CURRENT":
-                bookingList = bookingRepository.findAllCurrentByOwnerIdAndSortByDesc(ownerId);
+                bookingList = bookingRepository.findAllCurrentByOwnerIdAndSortByDesc(ownerId, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             case "PAST":
-                bookingList = bookingRepository.findAllPastByOwnerIdAndSortByDesc(ownerId);
+                bookingList = bookingRepository.findAllPastByOwnerIdAndSortByDesc(ownerId, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             case "FUTURE":
-                bookingList = bookingRepository.findAllFutureByOwnerIdAndSortByDesc(ownerId);
+                bookingList = bookingRepository.findAllFutureByOwnerIdAndSortByDesc(ownerId, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             case "WAITING":
                 bookingList = bookingRepository.findBookingsByStatusAndItemOwnerIdOrderByEndDesc(BookingStatus.WAITING,
-                        ownerId);
+                        ownerId, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             case "REJECTED":
                 bookingList = bookingRepository.findBookingsByStatusAndItemOwnerIdOrderByEndDesc(BookingStatus.REJECTED,
-                        ownerId);
+                        ownerId, sortedByEndDesc);
                 log.info(bookingList + " получен из базы данных.");
                 break;
             default:
@@ -175,6 +182,7 @@ public class BookingServiceImpl implements BookingService {
         if (!bookingList.isPresent()) {
             throw new NotFoundException("Бронирования не найдены");
         }
+
         return bookingList.get();
     }
 }

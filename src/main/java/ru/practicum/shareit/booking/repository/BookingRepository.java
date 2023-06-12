@@ -1,16 +1,19 @@
 package ru.practicum.shareit.booking.repository;
 
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
-public interface BookingRepository extends JpaRepository<Booking, Long> {
+public interface BookingRepository extends JpaRepository<Booking, Long>, PagingAndSortingRepository<Booking, Long> {
 
     @Query("SELECT b " +
             "FROM Booking b " +
@@ -22,14 +25,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Optional<Booking> findBookingByIdAndItemOwnerId(Long bookingId, Long ownerId);
 
-    Optional<List<Booking>> findBookingsByBookerIdOrderByEndDesc(Long bookerId);
+    Optional<List<Booking>> findBookingsByBookerId(Long bookerId, Pageable pageable);
 
-    Optional<List<Booking>> findBookingsByItemOwnerIdOrderByEndDesc(Long ownerId);
+    Optional<List<Booking>> findBookingsByItemOwnerIdOrderByEndDesc(Long ownerId, Pageable sortedByEndDesc);
 
-    Optional<List<Booking>> findBookingsByStatusAndBookerIdOrderByEndDesc(BookingStatus bookingStatus, Long bookerId);
+    Optional<List<Booking>> findBookingsByStatusAndBookerIdOrderByEndDesc(BookingStatus bookingStatus, Long bookerId,
+                                                                          Pageable pageable);
 
     Optional<List<Booking>> findBookingsByStatusAndItemOwnerIdOrderByEndDesc(BookingStatus bookingStatus,
-            Long bookerId);
+                                                                             Long bookerId, Pageable sortedByEndDesc);
 
     @Query("select b "
             + "from Booking as b "
@@ -37,7 +41,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             + "join fetch b.item as i "
             + "where booker.id = :bookerId and b.start <= current_timestamp  and  b.end >= current_timestamp "
             + "order by b.end desc ")
-    Optional<List<Booking>> findAllCurrentByUserIdAndSortByDesc(@Param("bookerId") Long bookerId);
+    Optional<List<Booking>> findAllCurrentByUserIdAndSortByDesc(@Param("bookerId") Long bookerId, Pageable pageable);
 
     @Query("select b "
             + "from Booking as b "
@@ -45,7 +49,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             + "join fetch b.item as i "
             + "where i.owner.id = :ownerId and b.start <= current_timestamp  and  b.end >= current_timestamp "
             + "order by b.end desc ")
-    Optional<List<Booking>> findAllCurrentByOwnerIdAndSortByDesc(@Param("ownerId") Long ownerId);
+    Optional<List<Booking>> findAllCurrentByOwnerIdAndSortByDesc(@Param("ownerId") Long ownerId, Pageable sortedByEndDesc);
 
     @Query("select b "
             + "from Booking as b "
@@ -53,7 +57,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             + "join fetch b.item as i "
             + "where booker.id = :bookerId and b.end < current_timestamp "
             + "order by b.end desc")
-    Optional<List<Booking>> findAllPastByUserIdAndSortByDesc(@Param("bookerId") Long bookerId);
+    Optional<List<Booking>> findAllPastByUserIdAndSortByDesc(@Param("bookerId") Long bookerId, Pageable pageable);
 
     @Query("select b "
             + "from Booking as b "
@@ -61,7 +65,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             + "join fetch b.item as i "
             + "where i.owner.id = :ownerId and b.end < current_timestamp "
             + "order by b.end desc")
-    Optional<List<Booking>> findAllPastByOwnerIdAndSortByDesc(@Param("ownerId") Long ownerId);
+    Optional<List<Booking>> findAllPastByOwnerIdAndSortByDesc(@Param("ownerId") Long ownerId, Pageable sortedByEndDesc);
 
     @Query("select b "
             + "from Booking as b "
@@ -69,7 +73,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             + "join fetch b.item as i "
             + "where booker.id = :bookerId and b.start > current_timestamp "
             + "order by b.end desc")
-    Optional<List<Booking>> findAllFutureByUserIdAndSortByDesc(@Param("bookerId") Long bookerId);
+    Optional<List<Booking>> findAllFutureByUserIdAndSortByDesc(@Param("bookerId") Long bookerId, Pageable pageable);
 
     @Query("select b "
             + "from Booking as b "
@@ -77,7 +81,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             + "join fetch b.item as i "
             + "where i.owner.id = :ownerId and b.start > current_timestamp "
             + "order by b.end desc")
-    Optional<List<Booking>> findAllFutureByOwnerIdAndSortByDesc(@Param("ownerId") Long ownerId);
+    Optional<List<Booking>> findAllFutureByOwnerIdAndSortByDesc(@Param("ownerId") Long ownerId, Pageable sortedByEndDesc);
 
     Optional<List<Booking>> findBookingsByItemIdOrderByEndDesc(Long itemId);
 
@@ -95,6 +99,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             + "join  b.booker as booker"
             + " where booker.id = :userId and i.id = :itemId and b.status = 'APPROVED' and  b.end < current_timestamp")
     List<Booking> findBookingByBookerIdAndItemIdAndStatusApproved(@Param("userId") Long bookerId,
-            @Param("itemId") Long itemId);
+                                                                  @Param("itemId") Long itemId);
 
 }
