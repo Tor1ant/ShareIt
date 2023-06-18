@@ -11,6 +11,7 @@
 
 	<groupId>ru.practicum</groupId>
 	<artifactId>shareit</artifactId>
+	<packaging>pom</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<name>ShareIt</name>
@@ -20,6 +21,11 @@
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 		<querydsl.version>5.0.0</querydsl.version>
 	</properties>
+
+	<modules>
+		<module>gateway</module>
+		<module>server</module>
+	</modules>
 
 	<dependencies>
 		<dependency>
@@ -89,7 +95,7 @@
 	<build>
 		<resources>
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>server/src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
 		</resources>
