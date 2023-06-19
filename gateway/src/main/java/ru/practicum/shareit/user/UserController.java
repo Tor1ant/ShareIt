@@ -37,6 +37,11 @@ public class UserController {
     public ResponseEntity<Object> saveNewUser(@RequestBody @Valid User user) {
         try {
             ResponseEntity<Object> userToSend = userClient.saveUser(user);
+            HttpStatus statusCode = userToSend.getStatusCode();
+            if (statusCode.is5xxServerError()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("Пользователь с email=" + user.getEmail() + " уже существует.");
+            }
             return ResponseEntity.ok(userToSend.getBody());
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("email занят");

@@ -1,10 +1,9 @@
 package ru.practicum.shareit.request.model;
 
-import lombok.Data;
-import ru.practicum.shareit.item.dto.ItemForRequestDto;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Data;
+import ru.practicum.shareit.item.dto.ItemForRequestDto;
 
 @Data
 public class ItemRequestDtoWithItems {
