@@ -78,6 +78,7 @@ public class BookingController {
             @RequestParam(required = false, defaultValue = "0") Long from,
             @RequestParam(required = false, defaultValue = "10") Long size) {
         isPageableValidation(from, size);
+
         ResponseEntity<Object> bookings = bookingClient.getAllOwnerBookings(userID, state, from, size);
         log.info(bookings + " переданы владельцу вещи");
         return bookings;

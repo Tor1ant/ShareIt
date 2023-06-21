@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.exceptions.BadRequestException;
-import ru.practicum.shareit.request.dto.ItemRequestInputDto;
 
 
 @RestController
