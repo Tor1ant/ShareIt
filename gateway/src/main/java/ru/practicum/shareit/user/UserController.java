@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.user.dto.UserDTO;
 import ru.practicum.shareit.user.model.User;
 
 @RestController
@@ -36,13 +35,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<Object> saveNewUser(@RequestBody @Valid User user) {
         try {
-            ResponseEntity<Object> userToSend = userClient.saveUser(user);
-            HttpStatus statusCode = userToSend.getStatusCode();
-            if (statusCode.is5xxServerError()) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body("Пользователь с email=" + user.getEmail() + " уже существует.");
-            }
-            return ResponseEntity.ok(userToSend.getBody());
+            return userClient.saveUser(user);
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("email занят");
         }
@@ -50,6 +43,7 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public ResponseEntity<Object> updateUser(@PathVariable int userId, @RequestBody UserDTO userDTO) {
+
         return userClient.updateUser(userId, userDTO);
     }
 

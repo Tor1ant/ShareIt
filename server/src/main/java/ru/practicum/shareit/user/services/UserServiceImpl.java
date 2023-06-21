@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.user.UserDTO;
 import ru.practicum.shareit.user.UsersMapStructMapper;
-import ru.practicum.shareit.user.dto.UserDTO;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -45,7 +45,12 @@ public class UserServiceImpl implements UserService {
     @Transactional()
     @Override
     public User saveUser(User user) {
-        User userFromBd = repository.save(user);
+        User userFromBd;
+        try {
+            userFromBd = repository.save(user);
+        } catch (Exception e) {
+            throw new ConflictException("пользователь с " + user.getEmail() + " уже существует.");
+        }
         log.info("Пользователь сохранён в базу данных= " + userFromBd);
         return userFromBd;
     }

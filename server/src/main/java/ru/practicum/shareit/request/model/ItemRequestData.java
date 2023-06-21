@@ -1,9 +1,9 @@
 package ru.practicum.shareit.request.model;
 
 import lombok.Data;
-import ru.practicum.shareit.request.dto.ItemRequestInputDto;
 
 import javax.validation.constraints.NotNull;
+import ru.practicum.shareit.request.dto.ItemRequestInputDto;
 
 @Data
 public class ItemRequestData {

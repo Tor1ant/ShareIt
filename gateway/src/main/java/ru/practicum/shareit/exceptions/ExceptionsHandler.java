@@ -1,6 +1,7 @@
 package ru.practicum.shareit.exceptions;
 
 import lombok.Data;
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 @Slf4j
+@Generated
 public class ExceptionsHandler {
 
     @ExceptionHandler(BadRequestException.class)
@@ -21,7 +23,7 @@ public class ExceptionsHandler {
 
     @RequiredArgsConstructor
     @Data
-    private class ErrorResponse {
+    private static class ErrorResponse {
 
         private final String error;
         private String description;

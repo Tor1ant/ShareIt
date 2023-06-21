@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.user;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

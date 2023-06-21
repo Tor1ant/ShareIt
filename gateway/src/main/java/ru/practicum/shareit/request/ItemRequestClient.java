@@ -1,7 +1,6 @@
 package ru.practicum.shareit.request;
 
 import java.util.Map;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,7 @@ public class ItemRequestClient extends BaseClient {
                 .build());
     }
 
-    public ResponseEntity<Object> postItemRequest(@Valid ItemRequestInputDto itemRequestData, Long creatorId) {
+    public ResponseEntity<Object> postItemRequest(ItemRequestInputDto itemRequestData, Long creatorId) {
         return post("", creatorId, itemRequestData);
     }
 
